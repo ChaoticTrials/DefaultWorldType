@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[26,)"
+[[mods]]
+modId="defaultworldtype"
+version="${file.jarVersion}"
+displayName="Default World Type"
+updateJSONURL="https://raw.githubusercontent.com/MelanX/DefaultWorldType/master/update/update.json"
+credits="Thanks for Biomes O' Plenty for the idea."
+authors="MelanX"
+description='''
+Changes the default world type to that one specified in config.
+'''
+[[dependencies.defaultworldtype]]
+    modId="forge"
+    mandatory=true
+    versionRange="[26,)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.defaultworldtype]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.14, 1.16)"
+    ordering="NONE"
+    side="CLIENT"
