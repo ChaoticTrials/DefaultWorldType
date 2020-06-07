@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -108,6 +109,8 @@ public class DefaultWorldType {
             configPath = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), MODID);
             try {
                 Files.createDirectory(configPath);
+            } catch (FileAlreadyExistsException e) {
+                LOGGER.info("Config directory " + MODID + " already exists. Skip creating.");
             } catch (IOException e) {
                 LOGGER.error("Failed to create " + MODID + " config directory", e);
             }
