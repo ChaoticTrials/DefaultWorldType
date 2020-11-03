@@ -1,3 +1,6 @@
+import net.minecraftforge.gradle.common.util.ModConfig
+import net.minecraftforge.gradle.common.util.RunConfig
+
 buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
@@ -18,61 +21,23 @@ archivesBaseName = "defaultworldtype-${mc_version}"
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-    mappings channel: 'snapshot', version: mappings_version
-
+    mappings("snapshot", mappings_version)
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
-    runs {
-        client {
-            workingDirectory project.file('run')
+    createRunConfig("client")
+    createRunConfig("server")
+}
 
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                defaultworldtype {
-                    source sourceSets.main
-                }
-            }
+def createRunConfig(String name, Closure extra = {}) {
+    minecraft.runs.create(name) { RunConfig run ->
+        run.workingDirectory project.file("run_" + name)
+        run.property "forge.logging.markers", "SCAN,REGISTRIES,REGISTRYDUMP"
+        run.jvmArg "-Dmixin.env.disableRefMap=true"
+        run.property "forge.logging.console.level", "info"
+        run.mods.create("defaultworldtype") { ModConfig mod ->
+            source sourceSets.main
         }
-
-        server {
-            workingDirectory project.file('run_server')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                defaultworldtype {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run_data')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            args '--mod', 'defaultworldtype', '--all', '--output', file('src/generated/resources/')
-
-            mods {
-                defaultworldtype {
-                    source sourceSets.main
-                }
-            }
-        }
-    }
+    }.with(extra)
 }
 
 dependencies {
@@ -82,12 +47,12 @@ dependencies {
 jar {
     manifest {
         attributes([
-                "Specification-Title": "defaultworldtype",
-                "Specification-Vendor": "MelanX",
-                "Specification-Version": "1", // We are version 1 of ourselves
-                "Implementation-Title": project.name,
-                "Implementation-Version": "${version}",
-                "Implementation-Vendor" :"MelanX",
+                "Specification-Title"     : "defaultworldtype",
+                "Specification-Vendor"    : "MelanX",
+                "Specification-Version"   : "1", // We are version 1 of ourselves
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : "${version}",
+                "Implementation-Vendor"   : "MelanX",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }

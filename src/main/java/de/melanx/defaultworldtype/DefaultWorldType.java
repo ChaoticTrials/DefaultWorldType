@@ -1,12 +1,10 @@
 package de.melanx.defaultworldtype;
 
-import net.minecraft.client.gui.screen.CreateWorldScreen;
-import net.minecraft.client.gui.screen.MainMenuScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.world.WorldType;
+import net.minecraft.client.gui.screen.*;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -25,6 +23,8 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
 
 @Mod(DefaultWorldType.MODID)
 public class DefaultWorldType {
@@ -54,23 +54,30 @@ public class DefaultWorldType {
 
         @SubscribeEvent
         @OnlyIn(Dist.CLIENT)
-        public static void onPreInitCreateWorld(GuiScreenEvent.InitGuiEvent.Pre event) {
+        public static void onPreInitCreateWorld(GuiOpenEvent event) {
             Screen screenGui = event.getGui();
             String worldTypeName = ClientConfig.worldTypeName.get();
-            WorldType defaultWorldType = WorldType.byName(worldTypeName);
 
             if (screenGui instanceof CreateWorldScreen) {
-                if (defaultWorldType != null) {
-                    CreateWorldScreen createWorldGui = (CreateWorldScreen) screenGui;
-
-                    if (createWorldGui.selectedIndex == WorldType.DEFAULT.getId()) {
-                        createWorldGui.selectedIndex = defaultWorldType.getId();
-                        if (!doneLogging && createWorldGui.selectedIndex != WorldType.DEFAULT.getId()) {
+                List<BiomeGeneratorTypeScreens> types = BiomeGeneratorTypeScreens.field_239068_c_;
+                for (int i = 0; i < types.size(); i++) {
+                    BiomeGeneratorTypeScreens s = BiomeGeneratorTypeScreens.field_239068_c_.get(i);
+                    String name = ((TranslationTextComponent) s.func_239077_a_()).getKey().replace("generator.", "");
+                    if (name.equals(worldTypeName)) {
+                        WorldOptionsScreen optionsScreen = ((CreateWorldScreen) screenGui).field_238934_c_;
+                        if (optionsScreen.field_239040_n_.isPresent()) {
+                            optionsScreen.field_239040_n_ = Optional.of(s);
+                            optionsScreen.field_239039_m_ = s.func_241220_a_(optionsScreen.field_239038_l_, optionsScreen.field_239039_m_.getSeed(), optionsScreen.field_239039_m_.doesGenerateFeatures(), optionsScreen.field_239039_m_.hasBonusChest());
+                        }
+                        if (!doneLogging && !worldTypeName.equals("default")) {
                             doneLogging = true;
                             LOGGER.info(String.format("%s was set as default world-type for new world.", worldTypeName));
                         }
+                        return;
                     }
-                } else {
+                }
+                if (!doneLogging) {
+                    doneLogging = true;
                     LOGGER.error(String.format("World-type %s is an invalid world-type.", worldTypeName));
                 }
             }
@@ -79,6 +86,7 @@ public class DefaultWorldType {
                 if (!createdWorldTypeFile) {
                     try {
                         File worldTypeFile = new File(configPath.toString() + "\\world-types.txt");
+                        //noinspection ResultOfMethodCallIgnored
                         worldTypeFile.createNewFile();
 
                         FileWriter writer = new FileWriter(worldTypeFile);
