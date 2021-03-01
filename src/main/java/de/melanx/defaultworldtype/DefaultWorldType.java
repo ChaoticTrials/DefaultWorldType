@@ -1,7 +1,11 @@
 package de.melanx.defaultworldtype;
 
 import net.minecraft.client.gui.screen.*;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.Dimension;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.FlatChunkGenerator;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.GuiOpenEvent;
@@ -23,6 +27,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,13 +74,27 @@ public class DefaultWorldType {
                             optionsScreen.field_239040_n_ = Optional.of(s);
                             optionsScreen.field_239039_m_ = s.func_241220_a_(optionsScreen.field_239038_l_, optionsScreen.field_239039_m_.getSeed(), optionsScreen.field_239039_m_.doesGenerateFeatures(), optionsScreen.field_239039_m_.hasBonusChest());
                         }
+
+                        if (name.equals("flat")) {
+                            Iterator<Dimension> iterator = optionsScreen.field_239039_m_.func_236224_e_().stream().iterator();
+                            while (iterator.hasNext()) {
+                                Dimension dimension = iterator.next();
+                                if (dimension.getChunkGenerator() instanceof FlatChunkGenerator) {
+                                    Registry<Biome> registry = optionsScreen.func_239055_b_().getRegistry(Registry.BIOME_KEY);
+                                    ((FlatChunkGenerator) dimension.getChunkGenerator()).field_236070_e_ = FlatPresetsScreen.func_243299_a(registry, ClientConfig.flatMapSettings.get(), ((FlatChunkGenerator) dimension.getChunkGenerator()).field_236070_e_);
+                                    break;
+                                }
+                            }
+                        }
+
                         if (!doneLogging && !worldTypeName.equals("default")) {
                             doneLogging = true;
                             LOGGER.info(String.format("%s was set as default world-type for new world.", worldTypeName));
                         }
-                        return;
+                        break;
                     }
                 }
+
                 if (!doneLogging) {
                     doneLogging = true;
                     LOGGER.error(String.format("World-type %s is an invalid world-type.", worldTypeName));
@@ -104,12 +123,16 @@ public class DefaultWorldType {
 
     public static class ClientConfig {
         public static ForgeConfigSpec.ConfigValue<String> worldTypeName;
+        public static ForgeConfigSpec.ConfigValue<String> flatMapSettings;
 
         ClientConfig(ForgeConfigSpec.Builder builder) {
             builder.push("world-type");
             worldTypeName = builder
                     .comment("Type in the name from the world type which should be selected by default.")
                     .define("world-type", "default", String.class::isInstance);
+            flatMapSettings = builder
+                    .comment("Type in a valid generation setting for flat world type.", "Only works if world-type if 'flat'.")
+                    .define("flat-settings", "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block;minecraft:plains", String.class::isInstance);
             builder.pop();
         }
 
