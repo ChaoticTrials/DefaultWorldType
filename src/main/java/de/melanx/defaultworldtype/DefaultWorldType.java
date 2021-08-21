@@ -104,7 +104,7 @@ public class DefaultWorldType {
             if (screenGui instanceof MainMenuScreen) {
                 if (!createdWorldTypeFile) {
                     try {
-                        File worldTypeFile = new File(configPath.toString() + "\\world-types.txt");
+                        File worldTypeFile = Paths.get(configPath.toString()).resolve("world-types.txt").toFile();
                         //noinspection ResultOfMethodCallIgnored
                         worldTypeFile.createNewFile();
 
