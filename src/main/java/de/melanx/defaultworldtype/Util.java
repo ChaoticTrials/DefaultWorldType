@@ -9,7 +9,11 @@ public class Util {
         StringBuilder stringBuilder = new StringBuilder();
         for (BiomeGeneratorTypeScreens s : BiomeGeneratorTypeScreens.field_239068_c_) {
             if (s != null)
-                stringBuilder.append("\n- ").append(((TranslationTextComponent) s.func_239077_a_()).getKey().replace("generator.", ""));
+                try {
+                    stringBuilder.append("\n- ").append(((TranslationTextComponent) s.func_239077_a_()).getKey().replace("generator.", ""));
+                } catch (ClassCastException e) {
+                    stringBuilder.append("\n- ").append(s.func_239077_a_().getUnformattedComponentText().replace("generator.", ""));
+                }
         }
         return stringBuilder.toString();
     }
