@@ -1,20 +1,24 @@
 package de.melanx.defaultworldtype;
 
-import net.minecraft.client.gui.screen.*;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.Dimension;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.FlatChunkGenerator;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
+import net.minecraft.client.gui.screens.worldselection.WorldGenSettingsComponent;
+import net.minecraft.core.Holder;
+import net.minecraft.core.IdMap;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.GuiOpenEvent;
+import net.minecraftforge.client.event.ScreenOpenEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -27,8 +31,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 
 @Mod(DefaultWorldType.MODID)
@@ -47,9 +49,10 @@ public class DefaultWorldType {
     }
 
     public DefaultWorldType() {
-        ClientConfig.setup();
-
-        MinecraftForge.EVENT_BUS.register(this);
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            ClientConfig.setup();
+            MinecraftForge.EVENT_BUS.register(this);
+        }
     }
 
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -59,65 +62,51 @@ public class DefaultWorldType {
 
         @SubscribeEvent
         @OnlyIn(Dist.CLIENT)
-        public static void onPreInitCreateWorld(GuiOpenEvent event) {
-            Screen screenGui = event.getGui();
+        public static void onPreInitCreateWorld(ScreenOpenEvent event) {
+            Screen screenGui = event.getScreen();
             String worldTypeName = ClientConfig.worldTypeName.get();
 
-            if (screenGui instanceof CreateWorldScreen) {
-                List<BiomeGeneratorTypeScreens> types = BiomeGeneratorTypeScreens.field_239068_c_;
-                for (int i = 0; i < types.size(); i++) {
-                    BiomeGeneratorTypeScreens s = BiomeGeneratorTypeScreens.field_239068_c_.get(i);
-                    String name = ((TranslationTextComponent) s.func_239077_a_()).getKey().replace("generator.", "");
-                    if (name.equals(worldTypeName)) {
-                        WorldOptionsScreen optionsScreen = ((CreateWorldScreen) screenGui).field_238934_c_;
-                        if (optionsScreen.field_239040_n_.isPresent()) {
-                            optionsScreen.field_239040_n_ = Optional.of(s);
-                            optionsScreen.field_239039_m_ = s.func_241220_a_(optionsScreen.field_239038_l_, optionsScreen.field_239039_m_.getSeed(), optionsScreen.field_239039_m_.doesGenerateFeatures(), optionsScreen.field_239039_m_.hasBonusChest());
-                        }
+            if (screenGui instanceof CreateWorldScreen createWorldScreen) {
+                if (!createdWorldTypeFile) {
+                    createAvailablePresetsFile(createWorldScreen.worldGenSettingsComponent);
+                    createdWorldTypeFile = true;
+                }
 
-                        if (name.equals("flat")) {
-                            Iterator<Dimension> iterator = optionsScreen.field_239039_m_.func_236224_e_().stream().iterator();
-                            while (iterator.hasNext()) {
-                                Dimension dimension = iterator.next();
-                                if (dimension.getChunkGenerator() instanceof FlatChunkGenerator) {
-                                    Registry<Biome> registry = optionsScreen.func_239055_b_().getRegistry(Registry.BIOME_KEY);
-                                    ((FlatChunkGenerator) dimension.getChunkGenerator()).field_236070_e_ = FlatPresetsScreen.func_243299_a(registry, ClientConfig.flatMapSettings.get(), ((FlatChunkGenerator) dimension.getChunkGenerator()).field_236070_e_);
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (!doneLogging && !worldTypeName.equals("default")) {
-                            doneLogging = true;
-                            LOGGER.info(String.format("%s was set as default world-type for new world.", worldTypeName));
-                        }
-                        break;
+                Optional<Holder<WorldPreset>> preset = createWorldScreen.worldGenSettingsComponent.preset;
+                if (preset.isPresent() && preset.get().is(new ResourceLocation(worldTypeName))) {
+                    if (!doneLogging) {
+                        LOGGER.info("Already correct preset selected: " + worldTypeName);
                     }
+
+                    return;
+                }
+
+                Optional<Holder<WorldPreset>> customPreset = WorldGenSettingsComponent.findPreset(createWorldScreen.worldGenSettingsComponent.settings(), Optional.of(ResourceKey.create(Registry.WORLD_PRESET_REGISTRY, new ResourceLocation(worldTypeName))));
+                if (customPreset.isPresent()) {
+                    createWorldScreen.worldGenSettingsComponent.preset = customPreset;
+                    return;
                 }
 
                 if (!doneLogging) {
-                    doneLogging = true;
                     LOGGER.error(String.format("World-type %s is an invalid world-type.", worldTypeName));
+                    doneLogging = true;
                 }
             }
+        }
+    }
 
-            if (screenGui instanceof MainMenuScreen) {
-                if (!createdWorldTypeFile) {
-                    try {
-                        File worldTypeFile = Paths.get(configPath.toString()).resolve("world-types.txt").toFile();
-                        //noinspection ResultOfMethodCallIgnored
-                        worldTypeFile.createNewFile();
-
-                        FileWriter writer = new FileWriter(worldTypeFile);
-                        writer.write(Util.countWorldTypes() + " possible world types found:");
-                        writer.write(Util.getWorldTypeNames());
-                        writer.close();
-                        createdWorldTypeFile = true;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+    private static void createAvailablePresetsFile(WorldGenSettingsComponent component) {
+        File file = Paths.get(configPath.toString()).resolve("world-types.txt").toFile();
+        try (FileWriter writer = new FileWriter(file)) {
+            IdMap<Holder<WorldPreset>> holders = component.registryHolder().registryOrThrow(Registry.WORLD_PRESET_REGISTRY).asHolderIdMap();
+            writer.write(holders.size() + " possible world presets found: \n");
+            for (Holder<WorldPreset> holder : holders) {
+                if (holder.unwrapKey().isPresent()) {
+                    writer.write(holder.unwrapKey().get().location().toString() + "\n");
                 }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -126,13 +115,10 @@ public class DefaultWorldType {
         public static ForgeConfigSpec.ConfigValue<String> flatMapSettings;
 
         ClientConfig(ForgeConfigSpec.Builder builder) {
-            builder.push("world-type");
+            builder.push("world-preset");
             worldTypeName = builder
                     .comment("Type in the name from the world type which should be selected by default.")
-                    .define("world-type", "default", String.class::isInstance);
-            flatMapSettings = builder
-                    .comment("Type in a valid generation setting for flat world type.", "Only works if world-type if 'flat'.")
-                    .define("flat-settings", "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block;minecraft:plains", String.class::isInstance);
+                    .define("world-preset", "minecraft:normal", String.class::isInstance);
             builder.pop();
         }
 
