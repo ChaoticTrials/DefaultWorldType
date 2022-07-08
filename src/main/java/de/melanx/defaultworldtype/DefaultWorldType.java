@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ScreenOpenEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -62,7 +62,7 @@ public class DefaultWorldType {
 
         @SubscribeEvent
         @OnlyIn(Dist.CLIENT)
-        public static void onPreInitCreateWorld(ScreenOpenEvent event) {
+        public static void onPreInitCreateWorld(ScreenEvent.Opening event) {
             Screen screenGui = event.getScreen();
             String worldTypeName = ClientConfig.worldTypeName.get();
 
@@ -84,6 +84,7 @@ public class DefaultWorldType {
                 Optional<Holder<WorldPreset>> customPreset = WorldGenSettingsComponent.findPreset(createWorldScreen.worldGenSettingsComponent.settings(), Optional.of(ResourceKey.create(Registry.WORLD_PRESET_REGISTRY, new ResourceLocation(worldTypeName))));
                 if (customPreset.isPresent()) {
                     createWorldScreen.worldGenSettingsComponent.preset = customPreset;
+                    createWorldScreen.worldGenSettingsComponent.updateSettings(settings -> customPreset.get().value().recreateWorldGenSettings(settings));
                     return;
                 }
 
