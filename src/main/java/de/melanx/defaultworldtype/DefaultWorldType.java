@@ -5,7 +5,7 @@ import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldGenSettingsComponent;
 import net.minecraft.core.Holder;
 import net.minecraft.core.IdMap;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
@@ -81,10 +81,10 @@ public class DefaultWorldType {
                     return;
                 }
 
-                Optional<Holder<WorldPreset>> customPreset = WorldGenSettingsComponent.findPreset(createWorldScreen.worldGenSettingsComponent.settings(), Optional.of(ResourceKey.create(Registry.WORLD_PRESET_REGISTRY, new ResourceLocation(worldTypeName))));
+                Optional<Holder<WorldPreset>> customPreset = WorldGenSettingsComponent.findPreset(createWorldScreen.worldGenSettingsComponent.settings(), Optional.of(ResourceKey.create(Registries.WORLD_PRESET, new ResourceLocation(worldTypeName))));
                 if (customPreset.isPresent()) {
                     createWorldScreen.worldGenSettingsComponent.preset = customPreset;
-                    createWorldScreen.worldGenSettingsComponent.updateSettings(settings -> customPreset.get().value().recreateWorldGenSettings(settings));
+                    createWorldScreen.worldGenSettingsComponent.updateSettings((registry, worldDimensions) -> customPreset.get().value().createWorldDimensions());
                     return;
                 }
 
@@ -99,7 +99,7 @@ public class DefaultWorldType {
     private static void createAvailablePresetsFile(WorldGenSettingsComponent component) {
         File file = Paths.get(configPath.toString()).resolve("world-types.txt").toFile();
         try (FileWriter writer = new FileWriter(file)) {
-            IdMap<Holder<WorldPreset>> holders = component.registryHolder().registryOrThrow(Registry.WORLD_PRESET_REGISTRY).asHolderIdMap();
+            IdMap<Holder<WorldPreset>> holders = component.registryHolder().registryOrThrow(Registries.WORLD_PRESET).asHolderIdMap();
             writer.write(holders.size() + " possible world presets found: \n");
             for (Holder<WorldPreset> holder : holders) {
                 if (holder.unwrapKey().isPresent()) {

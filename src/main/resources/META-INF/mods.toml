@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[42,)"
+loaderVersion="[44,)"
 license="Apache 2.0"
 
 [[mods]]
@@ -17,13 +17,13 @@ Changes the default world type to that one specified in config.
 [[dependencies.defaultworldtype]]
     modId="forge"
     mandatory=true
-    versionRange="[42,)"
+    versionRange="[44,)"
     ordering="NONE"
     side="CLIENT"
 
 [[dependencies.defaultworldtype]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19.1, 1.20)"
+    versionRange="[1.19.3, 1.20)"
     ordering="NONE"
     side="CLIENT"
