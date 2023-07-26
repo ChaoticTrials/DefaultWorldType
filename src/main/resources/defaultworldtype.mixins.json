@@ -1,7 +1,7 @@
 {
   "required": true,
   "compatibilityLevel": "JAVA_17",
-  "refmap": "utilitix.refmap.json",
+  "refmap": "defaultworldtype.refmap.json",
   "package": "de.melanx.defaultworldtype.mixin",
   "minVersion": "0.8",
   "client": [
