@@ -29,12 +29,16 @@ public class ClientConfig {
     public static final ForgeConfigSpec CLIENT_SPEC;
 
     public static ForgeConfigSpec.ConfigValue<String> worldTypeName;
+    public static ForgeConfigSpec.ConfigValue<String> flatMapSettings;
 
     ClientConfig(ForgeConfigSpec.Builder builder) {
         builder.push("world-preset");
         worldTypeName = builder
                 .comment("Type in the name from the world type which should be selected by default.")
                 .define("world-preset", "minecraft:normal", String.class::isInstance);
+        flatMapSettings = builder
+                .comment("Type in a valid generation setting for flat world type.", "Only works if world-type if 'minecraft:flat'.")
+                .define("flat-settings", "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block;minecraft:plains", String.class::isInstance);
         builder.pop();
     }
 
@@ -42,7 +46,7 @@ public class ClientConfig {
         try {
             Files.createDirectory(CONFIG_PATH);
         } catch (FileAlreadyExistsException e) {
-            DefaultWorldType.LOGGER.info("Config directory " + DefaultWorldType.MODID + " already exists. Skip creating.");
+            DefaultWorldType.LOGGER.debug("Config directory " + DefaultWorldType.MODID + " already exists. Skip creating.");
         } catch (IOException e) {
             DefaultWorldType.LOGGER.error("Failed to create " + DefaultWorldType.MODID + " config directory", e);
         }

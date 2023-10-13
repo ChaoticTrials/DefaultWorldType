@@ -3,15 +3,24 @@ package de.melanx.defaultworldtype.mixin;
 import de.melanx.defaultworldtype.ClientConfig;
 import de.melanx.defaultworldtype.DefaultWorldType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.PresetFlatWorldScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
+import net.minecraft.world.level.levelgen.presets.WorldPresets;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -58,6 +67,17 @@ public abstract class CreateWorldScreenMixin {
             for (WorldCreationUiState.WorldTypeEntry worldTypeEntry : presetList) {
                 if (worldTypeEntry.preset() == preset) {
                     createWorldScreen.getUiState().setWorldType(worldTypeEntry);
+                    if (preset.is(WorldPresets.FLAT)) {
+                        createWorldScreen.getUiState().updateDimensions((registry, worldDimensions) -> {
+                            HolderGetter<Block> block = settings.worldgenLoadContext().lookupOrThrow(Registries.BLOCK);
+                            HolderGetter<Biome> biome = settings.worldgenLoadContext().lookupOrThrow(Registries.BIOME);
+                            HolderGetter<StructureSet> structureSet = settings.worldgenLoadContext().lookupOrThrow(Registries.STRUCTURE_SET);
+                            HolderGetter<PlacedFeature> placedFeature = settings.worldgenLoadContext().lookupOrThrow(Registries.PLACED_FEATURE);
+                            FlatLevelSource flatLevelSource = new FlatLevelSource(PresetFlatWorldScreen.fromString(block, biome, structureSet, placedFeature, ClientConfig.flatMapSettings.get(), FlatLevelGeneratorSettings.getDefault(biome, structureSet, placedFeature)));
+
+                            return worldDimensions.replaceOverworldGenerator(registry, flatLevelSource);
+                        });
+                    }
                     break;
                 }
             }
