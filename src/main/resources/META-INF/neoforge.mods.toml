@@ -1,0 +1,32 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${license}"
+issueTrackerURL="https://github.com/ChaoticTrials/DefaultWorldType/issues"
+
+[[mods]]
+modId="${modid}"
+version="${mod_version}"
+displayName="Default World Type"
+updateJSONURL="https://assets.melanx.de/updates/defaultworldtype.json"
+displayURL="https://modrinth.com/user/MelanX"
+authors="MelanX"
+description="""
+Change the default world type for creating a new world in Create World screen
+"""
+
+[[mixins]]
+   config="${modid}.mixins.json"
+
+[[dependencies.${modid}]]
+   modId = "neoforge"
+   type = "required"
+   versionRange = "[${neo_version},)"
+   ordering="NONE"
+   side="BOTH"
+
+[[dependencies.${modid}]]
+   modId="minecraft"
+   type="required"
+   versionRange="[${minecraft_version},)"
+   ordering="NONE"
+   side="BOTH"

@@ -60,7 +60,7 @@ public abstract class CreateWorldScreenMixin {
         CreateWorldScreen createWorldScreen = new CreateWorldScreen(minecraft, lastScreen, settings, oldPreset, seed);
         if (holder.isPresent()) {
             Holder.Reference<WorldPreset> preset = holder.get();
-            DefaultWorldType.LOGGER.info("Set world type to " + ClientConfig.getKey().location());
+            DefaultWorldType.LOGGER.info("Set world type to {}", ClientConfig.getKey().location());
             List<WorldCreationUiState.WorldTypeEntry> presetList = new ArrayList<>(createWorldScreen.getUiState().getNormalPresetList());
             presetList.addAll(createWorldScreen.getUiState().getAltPresetList());
 
