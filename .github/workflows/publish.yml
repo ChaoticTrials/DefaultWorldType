@@ -26,7 +26,7 @@ jobs:
           echo "Commits since last push:"
           echo "$commits"
           if echo "$commits" | grep -qE '^\[meta\]'; then
-            echo "Commit message starts with [meta], exiting."
+            echo "Only meta commits present, skip publishing"
             echo "run_publish=false" >> $GITHUB_ENV
           else
             echo "run_publish=true" >> $GITHUB_ENV
