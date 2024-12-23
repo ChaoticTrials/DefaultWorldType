@@ -5,6 +5,7 @@ import de.melanx.defaultworldtype.DefaultWorldType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.PresetFlatWorldScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.worldselection.CreateWorldCallback;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
@@ -33,16 +34,15 @@ import java.util.stream.Collectors;
 @Mixin(CreateWorldScreen.class)
 public abstract class CreateWorldScreenMixin {
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Redirect(
-            method = "openFresh",
+            method = "openCreateWorldScreen",
             at = @At(
                     value = "NEW",
-                    target = "(Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/gui/screens/Screen;Lnet/minecraft/client/gui/screens/worldselection/WorldCreationContext;Ljava/util/Optional;Ljava/util/OptionalLong;)Lnet/minecraft/client/gui/screens/worldselection/CreateWorldScreen;"
+                    target = "(Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/gui/screens/Screen;Lnet/minecraft/client/gui/screens/worldselection/WorldCreationContext;Ljava/util/Optional;Ljava/util/OptionalLong;Lnet/minecraft/client/gui/screens/worldselection/CreateWorldCallback;)Lnet/minecraft/client/gui/screens/worldselection/CreateWorldScreen;"
             )
     )
-    private static CreateWorldScreen modifyWorldScreen(Minecraft minecraft, Screen lastScreen, WorldCreationContext settings, Optional<ResourceKey<WorldPreset>> oldPreset, OptionalLong seed) {
-        List<ResourceLocation> presets = settings.worldgenLoadContext().registryOrThrow(Registries.WORLD_PRESET).entrySet().stream()
+    private static CreateWorldScreen modifyWorldScreen(Minecraft minecraft, Screen lastScreen, WorldCreationContext settings, Optional<ResourceKey<WorldPreset>> oldPreset, OptionalLong seed, CreateWorldCallback createWorldCallback) {
+        List<ResourceLocation> presets = settings.worldgenLoadContext().lookupOrThrow(Registries.WORLD_PRESET).entrySet().stream()
                 .map(Map.Entry::getKey)
                 .map(ResourceKey::location)
                 .toList();
@@ -56,8 +56,8 @@ public abstract class CreateWorldScreenMixin {
             DefaultWorldType.LOGGER.error("Couldn't generate file with existing presets", e);
         }
 
-        Optional<Holder.Reference<WorldPreset>> holder = settings.worldgenLoadContext().registryOrThrow(Registries.WORLD_PRESET).getHolder(ClientConfig.getKey());
-        CreateWorldScreen createWorldScreen = new CreateWorldScreen(minecraft, lastScreen, settings, oldPreset, seed);
+        Optional<Holder.Reference<WorldPreset>> holder = settings.worldgenLoadContext().lookupOrThrow(Registries.WORLD_PRESET).get(ClientConfig.getKey());
+        CreateWorldScreen createWorldScreen = new CreateWorldScreen(minecraft, lastScreen, settings, oldPreset, seed, createWorldCallback);
         if (holder.isPresent()) {
             Holder.Reference<WorldPreset> preset = holder.get();
             DefaultWorldType.LOGGER.info("Set world type to {}", ClientConfig.getKey().location());
