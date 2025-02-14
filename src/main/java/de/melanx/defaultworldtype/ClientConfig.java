@@ -27,7 +27,7 @@ public class ClientConfig {
     public static ModConfigSpec.ConfigValue<String> flatMapSettings;
 
     ClientConfig(ModConfigSpec.Builder builder) {
-        builder.push("world-preset");
+        builder.push("world-preset"); // todo 1.21.5/1.22 remove the extra category
         worldTypeName = builder
                 .comment("Type in the name from the world type which should be selected by default.")
                 .define("world-preset", "minecraft:normal", String.class::isInstance);

@@ -23,7 +23,7 @@ body:
     id: forge-version
     attributes:
       label: NeoForge version
-      placeholder: eg. 21.0.0-beta
+      placeholder: eg. 21.0.0
     validations:
       required: true
   - type: input
