@@ -1,5 +1,5 @@
 plugins {
-    id 'org.moddingx.modgradle.meta' version '5.0.2'
+    id 'org.moddingx.modgradle.meta' version '5.0.3'
 }
 
 repositories {
@@ -26,7 +26,7 @@ mod.configure {
         }
     }
 
-    neoforge project.hasProperty('neo_version') ? project.neo_version : "${baseVersion}.63"
+    neoforge project.hasProperty('neo_version') ? project.neo_version : "${baseVersion}.0-beta"
 
     license 'The Apache License, Version 2.0'
     github 'ChaoticTrials/DefaultWorldType'
@@ -52,6 +52,7 @@ mod.configure {
             type 'beta'
             version '1.21.3'
             version '1.21.4'
+            version '1.21.5'
         }
         curseforge {
             projectId 373014
