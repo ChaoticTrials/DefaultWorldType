@@ -5,8 +5,8 @@
   "package": "de.melanx.defaultworldtype.mixin",
   "minVersion": "0.8",
   "client": [
-    "CreateWorldScreenMixin"
+    "CreateWorldScreenMixin", "WorldTabMixin"
   ],
-  "server": [],
-  "mixins": []
+  "server": [ ],
+  "mixins": [ ]
 }
