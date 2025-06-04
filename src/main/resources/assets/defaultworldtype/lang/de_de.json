@@ -1,6 +1,8 @@
 {
+  "defaultworldtype.tooltip.disable": "Deaktiviert von DefaultWorldType",
   "defaultworldtype.configuration.flat-settings": "Flachland Einstellungen",
   "defaultworldtype.configuration.world-preset": "Weltvoreinstellung",
+  "defaultworldtype.configuration.disable-button": "Button deaktivieren",
   "defaultworldtype.configuration.section.defaultworldtype.client.config.toml.title": "Default World Type",
   "defaultworldtype.configuration.flat-settings.tooltip": "Gib eine gültige Generierungseinstellung für den Welttyp 'Flachland' ein. Funktioniert nur, wenn Welt-Typ auf 'minecraft:flat' gesetzt ist.",
   "defaultworldtype.configuration.world-preset.tooltip": "Der Name des Welttyps, der standardmäßig ausgewählt sein soll",
