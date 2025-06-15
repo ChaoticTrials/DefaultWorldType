@@ -4,9 +4,7 @@
   "refmap": "defaultworldtype.refmap.json",
   "package": "de.melanx.defaultworldtype.mixin",
   "minVersion": "0.8",
-  "client": [
-    "CreateWorldScreenMixin", "WorldTabMixin"
-  ],
+  "client": [ "WorldCreationUiStateMixin", "WorldTabMixin" ],
   "server": [ ],
   "mixins": [ ]
 }
