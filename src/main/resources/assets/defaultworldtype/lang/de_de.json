@@ -6,5 +6,6 @@
   "defaultworldtype.configuration.section.defaultworldtype.client.config.toml.title": "Default World Type",
   "defaultworldtype.configuration.flat-settings.tooltip": "Gib eine gültige Generierungseinstellung für den Welttyp 'Flachland' ein. Funktioniert nur, wenn Welt-Typ auf 'minecraft:flat' gesetzt ist.",
   "defaultworldtype.configuration.world-preset.tooltip": "Der Name des Welttyps, der standardmäßig ausgewählt sein soll",
-  "defaultworldtype.configuration.world-preset.button": "Tauch tiefer ein"
+  "defaultworldtype.configuration.world-preset.button": "Tauch tiefer ein",
+  "defaultworldtype.configuration.allowed-world-types": "Erlaubte Welttypen"
 }

@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 public class ClientConfig {
 
@@ -26,6 +27,7 @@ public class ClientConfig {
     public static ModConfigSpec.ConfigValue<String> worldTypeName;
     public static ModConfigSpec.ConfigValue<String> flatMapSettings;
     public static ModConfigSpec.BooleanValue disablePresetSelectionButton;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> allowedWorldTypes;
 
     ClientConfig(ModConfigSpec.Builder builder) {
         builder.push("world-preset"); // todo 1.21.5/1.22 remove the extra category
@@ -38,6 +40,12 @@ public class ClientConfig {
         disablePresetSelectionButton = builder
                 .comment("Disables the preset selection button in the world selection screen.")
                 .define("disable-button", false);
+        allowedWorldTypes = builder
+                .comment("The list of world types which should be available in the world selection screen. If empty, all world types are available.")
+                .defineList("allowed-world-types",
+                        List.of(),
+                        () -> "",
+                        String.class::isInstance);
         builder.pop();
     }
 
