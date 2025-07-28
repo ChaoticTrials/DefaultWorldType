@@ -24,8 +24,9 @@ public class ClientConfig {
     public static final ClientConfig CLIENT;
     public static final ModConfigSpec CLIENT_SPEC;
 
-    public static ModConfigSpec.ConfigValue<String> worldTypeName;
+    private static ModConfigSpec.ConfigValue<String> worldTypeName;
     public static ModConfigSpec.ConfigValue<String> flatMapSettings;
+    private static ModConfigSpec.ConfigValue<String> singleBiome;
     public static ModConfigSpec.BooleanValue disablePresetSelectionButton;
     public static ModConfigSpec.ConfigValue<List<? extends String>> allowedWorldTypes;
 
@@ -35,8 +36,11 @@ public class ClientConfig {
                 .comment("Type in the name from the world type which should be selected by default.")
                 .define("world-preset", "minecraft:normal", String.class::isInstance);
         flatMapSettings = builder
-                .comment("Type in a valid generation setting for flat world type.", "Only works if world-type if 'minecraft:flat'.")
+                .comment("Type in a valid generation setting for flat world type.", "Only works if world-type is 'minecraft:flat'.")
                 .define("flat-settings", "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block;minecraft:plains", String.class::isInstance);
+        singleBiome = builder
+                .comment("Type in a valid biome for single biome world type.", "Only works if world-type is 'minecraft:single_biome_surface'.")
+                .define("single-biome-biome", "minecraft:plains", String.class::isInstance);
         disablePresetSelectionButton = builder
                 .comment("Disables the preset selection button in the world selection screen.")
                 .define("disable-button", false);
@@ -52,5 +56,9 @@ public class ClientConfig {
     public static ResourceKey<WorldPreset> getKey() {
         ResourceLocation location = ResourceLocation.tryParse(worldTypeName.get());
         return ResourceKey.create(Registries.WORLD_PRESET, location == null ? ResourceLocation.withDefaultNamespace("normal") : location);
+    }
+
+    public static ResourceLocation getFixedBiome() {
+        return ResourceLocation.tryParse(singleBiome.get());
     }
 }
