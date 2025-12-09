@@ -10,8 +10,7 @@ repositories {
 }
 
 var dev = System.getenv('IS_DEV')?.toBoolean() ?: false
-var baseVersion = '21.3'
-var modBaseVersion = '1.21.3-5.1'
+var baseVersion = '21.11'
 
 mod.configure {
     modid 'defaultworldtype'
@@ -21,12 +20,12 @@ mod.configure {
             def gitCommitHash = ['git', 'rev-parse', 'HEAD'].execute().text.trim()
             constant baseVersion + (gitCommitHash ? "-${gitCommitHash}" : '')
         } else {
-            base modBaseVersion
+            base baseVersion
             maven 'https://maven.melanx.de/release'
         }
     }
 
-    neoforge project.hasProperty('neo_version') ? project.neo_version : "${baseVersion}.0-beta"
+    neoforge "${baseVersion}.0-beta"
 
     license 'The Apache License, Version 2.0'
     github 'ChaoticTrials/DefaultWorldType'
@@ -50,14 +49,7 @@ mod.configure {
     upload {
         all {
             type 'beta'
-            version '1.21.3'
-            version '1.21.4'
-            version '1.21.5'
-            version '1.21.6'
-            version '1.21.7'
-            version '1.21.8'
-            version '1.21.9'
-            version '1.21.10'
+            version '1.21.11'
         }
         curseforge {
             projectId 373014

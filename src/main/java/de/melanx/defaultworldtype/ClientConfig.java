@@ -1,8 +1,8 @@
 package de.melanx.defaultworldtype;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -54,11 +54,11 @@ public class ClientConfig {
     }
 
     public static ResourceKey<WorldPreset> getKey() {
-        ResourceLocation location = ResourceLocation.tryParse(worldTypeName.get());
-        return ResourceKey.create(Registries.WORLD_PRESET, location == null ? ResourceLocation.withDefaultNamespace("normal") : location);
+        Identifier location = Identifier.tryParse(worldTypeName.get());
+        return ResourceKey.create(Registries.WORLD_PRESET, location == null ? Identifier.withDefaultNamespace("normal") : location);
     }
 
-    public static ResourceLocation getFixedBiome() {
-        return ResourceLocation.tryParse(singleBiome.get());
+    public static Identifier getFixedBiome() {
+        return Identifier.tryParse(singleBiome.get());
     }
 }

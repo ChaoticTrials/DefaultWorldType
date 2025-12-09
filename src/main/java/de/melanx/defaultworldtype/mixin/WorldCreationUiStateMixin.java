@@ -9,8 +9,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.FixedBiomeSource;
@@ -71,10 +71,10 @@ public abstract class WorldCreationUiStateMixin {
 
     @Unique
     private static void defaultWorldType$writeRegistryToFile(Registry<?> registry, String registryName) {
-        List<ResourceLocation> ids = registry.entrySet()
+        List<Identifier> ids = registry.entrySet()
                 .stream()
                 .map(Map.Entry::getKey)
-                .map(ResourceKey::location)
+                .map(ResourceKey::identifier)
                 .sorted()
                 .toList();
 
@@ -94,7 +94,7 @@ public abstract class WorldCreationUiStateMixin {
     private static List<WorldCreationUiState.WorldTypeEntry> defaultWorldType$buildPreferredPresetEntries(Registry<WorldPreset> registry) {
         List<WorldCreationUiState.WorldTypeEntry> result = new ArrayList<>();
         for (String s : ClientConfig.allowedWorldTypes.get()) {
-            ResourceLocation id = ResourceLocation.parse(s);
+            Identifier id = Identifier.parse(s);
             ResourceKey<WorldPreset> key = ResourceKey.create(Registries.WORLD_PRESET, id);
             registry.get(key).ifPresentOrElse(
                     holder -> result.add(new WorldCreationUiState.WorldTypeEntry(holder)),
