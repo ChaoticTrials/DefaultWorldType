@@ -15,6 +15,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 public class ClientConfig {
 
@@ -31,6 +32,7 @@ public class ClientConfig {
     public static ForgeConfigSpec.ConfigValue<String> worldTypeName;
     public static ForgeConfigSpec.ConfigValue<String> flatMapSettings;
     public static ForgeConfigSpec.BooleanValue disablePresetSelectionButton;
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> allowedWorldTypes;
 
     ClientConfig(ForgeConfigSpec.Builder builder) {
         builder.push("world-preset");
@@ -43,6 +45,11 @@ public class ClientConfig {
         disablePresetSelectionButton = builder
                 .comment("Disables the preset selection button in the world selection screen.")
                 .define("disable-button", false);
+        allowedWorldTypes = builder
+                .comment("The list of world types which should be available in the world selection screen. If empty, all world types are available.")
+                .defineList("allowed-world-types",
+                        List.of(),
+                        String.class::isInstance);
         builder.pop();
     }
 
