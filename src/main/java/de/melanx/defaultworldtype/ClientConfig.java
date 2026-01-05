@@ -3,6 +3,7 @@ package de.melanx.defaultworldtype;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -16,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 
 public class ClientConfig {
 
@@ -29,8 +31,9 @@ public class ClientConfig {
     public static final ClientConfig CLIENT;
     public static final ForgeConfigSpec CLIENT_SPEC;
 
-    public static ForgeConfigSpec.ConfigValue<String> worldTypeName;
+    private static ForgeConfigSpec.ConfigValue<String> worldTypeName;
     public static ForgeConfigSpec.ConfigValue<String> flatMapSettings;
+    private static ForgeConfigSpec.ConfigValue<String> singleBiome;
     public static ForgeConfigSpec.BooleanValue disablePresetSelectionButton;
     public static ForgeConfigSpec.ConfigValue<List<? extends String>> allowedWorldTypes;
 
@@ -42,6 +45,9 @@ public class ClientConfig {
         flatMapSettings = builder
                 .comment("Type in a valid generation setting for flat world type.", "Only works if world-type if 'minecraft:flat'.")
                 .define("flat-settings", "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block;minecraft:plains", String.class::isInstance);
+        singleBiome = builder
+                .comment("Type in a valid biome for single biome world type.", "Only works if world-type is 'minecraft:single_biome_surface'.")
+                .define("single-biome-biome", "minecraft:plains", String.class::isInstance);
         disablePresetSelectionButton = builder
                 .comment("Disables the preset selection button in the world selection screen.")
                 .define("disable-button", false);
@@ -67,5 +73,9 @@ public class ClientConfig {
 
     public static ResourceKey<WorldPreset> getKey() {
         return ResourceKey.create(Registries.WORLD_PRESET, new ResourceLocation(worldTypeName.get()));
+    }
+
+    public static ResourceKey<Biome> getFixedBiome() {
+        return ResourceKey.create(Registries.BIOME, Objects.requireNonNull(ResourceLocation.tryParse(singleBiome.get())));
     }
 }

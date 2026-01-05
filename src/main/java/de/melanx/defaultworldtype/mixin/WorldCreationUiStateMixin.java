@@ -5,14 +5,19 @@ import de.melanx.defaultworldtype.DefaultWorldType;
 import net.minecraft.client.gui.screens.PresetFlatWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
@@ -42,8 +47,10 @@ public abstract class WorldCreationUiStateMixin {
     private void afterUpdatePresetLists(CallbackInfo ci) {
         WorldCreationUiState state = (WorldCreationUiState) (Object) this;
         Registry<WorldPreset> worldPresets = state.getSettings().worldgenLoadContext().registryOrThrow(Registries.WORLD_PRESET);
+        Registry<Biome> biomes = state.getSettings().worldgenLoadContext().registryOrThrow(Registries.BIOME);
 
-        WorldCreationUiStateMixin.defaultWorldType$writeAvailablePresetsFile(worldPresets);
+        WorldCreationUiStateMixin.defaultWorldType$writeRegistryToFile(worldPresets, "world-presets");
+        WorldCreationUiStateMixin.defaultWorldType$writeRegistryToFile(biomes, "biomes");
 
         List<WorldCreationUiState.WorldTypeEntry> preferredPresets = defaultWorldType$buildPreferredPresetEntries(worldPresets);
         if (!preferredPresets.isEmpty()) {
@@ -52,28 +59,34 @@ public abstract class WorldCreationUiStateMixin {
         }
 
         WorldCreationUiStateMixin.defaultWorldType$selectInitialWorldType(state);
+
         if (ClientConfig.getKey() == WorldPresets.FLAT) {
             defaultWorldType$setFlatSettings(state);
+        }
+
+        if (ClientConfig.getKey() == WorldPresets.SINGLE_BIOME_SURFACE) {
+            WorldCreationUiStateMixin.defaultWorldType$setSingleBiome(state);
         }
     }
 
     @Unique
-    private static void defaultWorldType$writeAvailablePresetsFile(Registry<WorldPreset> registry) {
+    private static void defaultWorldType$writeRegistryToFile(Registry<?> registry, String registryName) {
         List<ResourceLocation> ids = registry.entrySet()
                 .stream()
                 .map(Map.Entry::getKey)
                 .map(ResourceKey::location)
+                .sorted()
                 .toList();
 
-        String content = ids.size() + " possible world presets found:\n" +
+        String content = ids.size() + " possible " + registryName + " found:\n" +
                 ids.stream()
                         .map(loc -> "- \"" + loc + "\"")
                         .collect(Collectors.joining("\n"));
 
         try {
-            Files.writeString(ClientConfig.CONFIG_PATH.resolve("world-presets.txt"), content);
+            Files.writeString(ClientConfig.CONFIG_PATH.resolve(registryName + ".txt"), content);
         } catch (IOException ex) {
-            DefaultWorldType.LOGGER.error("Couldn't generate file with existing presets", ex);
+            DefaultWorldType.LOGGER.error("Couldn't generate file with existing {}", registryName, ex);
         }
     }
 
@@ -121,6 +134,21 @@ public abstract class WorldCreationUiStateMixin {
             FlatLevelSource flatLevelSource = new FlatLevelSource(PresetFlatWorldScreen.fromString(block, biome, structureSet, placedFeature, ClientConfig.flatMapSettings.get(), FlatLevelGeneratorSettings.getDefault(biome, structureSet, placedFeature)));
 
             return worldDimensions.replaceOverworldGenerator(registry, flatLevelSource);
+        });
+    }
+
+    @Unique
+    private static void defaultWorldType$setSingleBiome(WorldCreationUiState state) {
+        state.updateDimensions((registry, worldDimensions) -> {
+            WorldCreationContext settings = state.getSettings();
+
+            Registry<Biome> biomes = settings.worldgenLoadContext().registryOrThrow(Registries.BIOME);
+            Registry<NoiseGeneratorSettings> noiseGeneratorSettings = settings.worldgenLoadContext().registryOrThrow(Registries.NOISE_SETTINGS);
+            Holder.Reference<Biome> biomeReference = biomes.getHolder(ClientConfig.getFixedBiome()).orElseGet(() -> biomes.getHolderOrThrow(Biomes.PLAINS));
+            FixedBiomeSource fixedBiomeSource = new FixedBiomeSource(biomeReference);
+            NoiseBasedChunkGenerator noiseBasedChunkGenerator = new NoiseBasedChunkGenerator(fixedBiomeSource, noiseGeneratorSettings.getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD));
+
+            return worldDimensions.replaceOverworldGenerator(registry, noiseBasedChunkGenerator);
         });
     }
 }
