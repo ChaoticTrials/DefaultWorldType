@@ -30,6 +30,7 @@ public class ClientConfig {
 
     public static ForgeConfigSpec.ConfigValue<String> worldTypeName;
     public static ForgeConfigSpec.ConfigValue<String> flatMapSettings;
+    public static ForgeConfigSpec.BooleanValue disablePresetSelectionButton;
 
     ClientConfig(ForgeConfigSpec.Builder builder) {
         builder.push("world-preset");
@@ -39,6 +40,9 @@ public class ClientConfig {
         flatMapSettings = builder
                 .comment("Type in a valid generation setting for flat world type.", "Only works if world-type if 'minecraft:flat'.")
                 .define("flat-settings", "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block;minecraft:plains", String.class::isInstance);
+        disablePresetSelectionButton = builder
+                .comment("Disables the preset selection button in the world selection screen.")
+                .define("disable-button", false);
         builder.pop();
     }
 
