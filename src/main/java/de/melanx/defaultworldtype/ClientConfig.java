@@ -31,7 +31,6 @@ public class ClientConfig {
     public static ModConfigSpec.ConfigValue<List<? extends String>> allowedWorldTypes;
 
     ClientConfig(ModConfigSpec.Builder builder) {
-        builder.push("world-preset"); // todo 1.21.5/1.22 remove the extra category
         worldTypeName = builder
                 .comment("Type in the name from the world type which should be selected by default.")
                 .define("world-preset", "minecraft:normal", String.class::isInstance);
@@ -50,7 +49,6 @@ public class ClientConfig {
                         List.of(),
                         () -> "",
                         String.class::isInstance);
-        builder.pop();
     }
 
     public static ResourceKey<WorldPreset> getKey() {
