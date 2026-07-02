@@ -51,6 +51,8 @@ mod.configure {
         all {
             type releaseType
             version '26.1'
+            version '26.1.1'
+            version '26.1.2'
         }
         curseforge {
             projectId 373014
