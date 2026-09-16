@@ -10,6 +10,7 @@ displayURL = "${mod.source_url}"
 displayName = "Default World Type"
 updateJSONURL = "https://assets.melanx.de/updates/defaultworldtype.json"
 authors = "MelanX"
+iconFile = "${mod.modid}_icon.png"
 description = """
 Change the default world type for creating a new world in Create World screen
 """
